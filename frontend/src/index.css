@@ -9,6 +9,11 @@ body {
   color: white;
 }
 
+/* Voyager 타일 배경색 맞춤 */
+.leaflet-container {
+  background: #f0f0f0;
+}
+
 .leaflet-container {
   width: 100%;
   height: 100%;
