@@ -51,11 +51,19 @@ function MapPanner({ center }) {
   return null
 }
 
-// Risk Score 계산
+// Risk Score 계산 (0~99)
 function calcRiskScore(spot) {
   const shopScore = Math.min(60, Math.round(spot.음주업소합계 / 5))
   const cctvPenalty = spot.카메라수 === 0 ? 30 : 0
   return Math.min(99, shopScore + cctvPenalty)
+}
+
+// 위험도에 따른 색상
+function riskColor(score) {
+  if (score >= 70) return '#ef4444'  // 빨강 (최고위험)
+  if (score >= 50) return '#f97316'  // 주황 (고위험)
+  if (score >= 30) return '#eab308'  // 노랑 (중위험)
+  return '#22c55e'                   // 초록 (저위험)
 }
 
 const LOG_COLORS = {
@@ -323,36 +331,58 @@ export default function App() {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
               />
 
-              {/* 위험 지점 마커 */}
+              {/* 히트맵 레이어 (큰 반투명 원) */}
               {spots.map((spot, idx) => {
                 const risk = calcRiskScore(spot)
-                const isHigh = risk >= 50
+                const color = riskColor(risk)
                 return (
                   <CircleMarker
-                    key={idx}
+                    key={`heat-${idx}`}
                     center={[spot.위도, spot.경도]}
-                    radius={4 + (spot.음주업소합계 / 25)}
-                    fillColor={isHigh ? '#ef4444' : '#f97316'}
+                    radius={10 + (spot.음주업소합계 / 8)}
+                    fillColor={color}
+                    color="transparent"
+                    weight={0}
+                    fillOpacity={0.12}
+                    interactive={false}
+                  />
+                )
+              })}
+
+              {/* 실제 마커 (클릭 가능) */}
+              {spots.map((spot, idx) => {
+                const risk = calcRiskScore(spot)
+                const color = riskColor(risk)
+                return (
+                  <CircleMarker
+                    key={`dot-${idx}`}
+                    center={[spot.위도, spot.경도]}
+                    radius={6 + (spot.음주업소합계 / 20)}
+                    fillColor={color}
                     color="#0f172a"
-                    weight={1}
-                    fillOpacity={0.75}
+                    weight={1.5}
+                    fillOpacity={0.9}
                   >
                     <Popup>
-                      <div className="text-slate-900 text-xs p-1 min-w-36">
-                        <p className="font-bold border-b border-slate-200 pb-1 mb-2">
+                      <div style={{ color: '#1e293b', fontSize: '12px', padding: '4px', minWidth: '160px' }}>
+                        <p style={{ fontWeight: 'bold', borderBottom: '1px solid #e2e8f0', paddingBottom: '6px', marginBottom: '8px' }}>
                           📍 사고다발지 {spot.사고다발지id}
                         </p>
-                        <div className="space-y-0.5 mb-2">
-                          <p>음주업소: <b>{spot.음주업소합계}개</b></p>
-                          <p>유흥주점: <b>{spot.유흥주점수}개</b></p>
-                          <p>CCTV: <b>{spot.카메라수}대</b></p>
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                          <tbody>
+                            <tr><td style={{ color: '#64748b', paddingBottom: '3px' }}>음주업소</td><td style={{ fontWeight: 'bold', textAlign: 'right' }}>{spot.음주업소합계}개</td></tr>
+                            <tr><td style={{ color: '#64748b', paddingBottom: '3px' }}>유흥주점</td><td style={{ fontWeight: 'bold', textAlign: 'right' }}>{spot.유흥주점수}개</td></tr>
+                            <tr><td style={{ color: '#64748b', paddingBottom: '3px' }}>소상공인</td><td style={{ fontWeight: 'bold', textAlign: 'right' }}>{spot.소상공인수}개</td></tr>
+                            <tr><td style={{ color: '#64748b' }}>CCTV</td><td style={{ fontWeight: 'bold', textAlign: 'right' }}>{spot.카메라수}대</td></tr>
+                          </tbody>
+                        </table>
+                        <div style={{ borderTop: '1px solid #e2e8f0', marginTop: '8px', paddingTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ color: '#64748b', fontSize: '11px' }}>AI Risk Score</span>
+                          <span style={{ fontSize: '24px', fontWeight: '900', color }}>{risk}</span>
                         </div>
-                        <div className="border-t border-slate-200 pt-2 flex items-center justify-between">
-                          <span className="text-slate-500 text-xs">Risk Score</span>
-                          <span className="text-2xl font-black" style={{ color: isHigh ? '#ef4444' : '#f97316' }}>
-                            {risk}
-                          </span>
-                        </div>
+                        {spot.카메라수 === 0 && (
+                          <p style={{ marginTop: '6px', color: '#ef4444', fontSize: '11px', fontWeight: 'bold' }}>⚠ CCTV 미설치 구역</p>
+                        )}
                       </div>
                     </Popup>
                   </CircleMarker>
@@ -433,18 +463,26 @@ export default function App() {
 
             {/* 범례 */}
             <div className="mt-3 p-3 bg-slate-900 rounded-xl border border-slate-800 shrink-0">
-              <p className="text-xs text-slate-500 mb-2 font-semibold">범례</p>
+              <p className="text-xs text-slate-500 mb-2 font-semibold">위험도 범례</p>
               <div className="space-y-1.5 text-xs">
                 <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-red-500 shrink-0" />
-                  <span className="text-slate-400">고위험 지점 (Risk ≥ 50)</span>
+                  <span className="w-3 h-3 rounded-full shrink-0" style={{ background: '#ef4444' }} />
+                  <span className="text-slate-400">최고위험 (Score ≥ 70)</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-orange-500 shrink-0" />
-                  <span className="text-slate-400">위험 지점</span>
+                  <span className="w-3 h-3 rounded-full shrink-0" style={{ background: '#f97316' }} />
+                  <span className="text-slate-400">고위험 (Score 50~69)</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-orange-400 shrink-0" style={{ boxShadow: '0 0 6px #f97316' }} />
+                  <span className="w-3 h-3 rounded-full shrink-0" style={{ background: '#eab308' }} />
+                  <span className="text-slate-400">중위험 (Score 30~49)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full shrink-0" style={{ background: '#22c55e' }} />
+                  <span className="text-slate-400">저위험 (Score &lt; 30)</span>
+                </div>
+                <div className="flex items-center gap-2 pt-1 border-t border-slate-800">
+                  <span className="w-3 h-3 rounded-full shrink-0" style={{ background: '#f97316', boxShadow: '0 0 6px #f97316' }} />
                   <span className="text-slate-400">추적 차량</span>
                 </div>
               </div>
