@@ -309,6 +309,8 @@ export default function App() {
 
           {/* ── 중앙: 지도 ── */}
           <div className="flex-1 relative min-w-0">
+            {/* absolute inset-0: flexbox 안에서 height:100%가 안 먹히는 문제 해결 */}
+            <div className="absolute inset-0">
             <MapContainer
               center={[35.5437, 129.3301]}
               zoom={14}
@@ -373,6 +375,7 @@ export default function App() {
                 <Marker position={trackerPos} icon={carIcon} />
               )}
             </MapContainer>
+            </div>
 
             {/* 시나리오 제어 버튼 */}
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000] flex gap-2">
