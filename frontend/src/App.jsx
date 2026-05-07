@@ -1,24 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
-import axios from 'axios';
-import { ShieldAlert, Video, BarChart3, Settings } from 'lucide-react';
-
-// 백엔드 API 주소
-const API_BASE = "http://localhost:8000/api";
+import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
+import { supabase } from './supabaseClient';
+import { ShieldAlert, Video, BarChart3, Settings, LogIn } from 'lucide-react';
 
 function App() {
-  const [data, setData] = useState({ stats: {}, spots: [] });
+  const [spots, setSpots] = useState([]);
+  const [stats, setStats] = useState({ avg_shops: 0, cctv_rate: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 백엔드에서 위험 구역 데이터 가져오기
-    axios.get(`${API_BASE}/risk-data`)
-      .then(res => {
-        setData(res.data);
-        setLoading(false);
-      })
-      .catch(err => console.error("데이터 로딩 실패:", err));
+    fetchData();
   }, []);
+
+  async function fetchData() {
+    setLoading(true);
+    // Supabase에서 'spots' 테이블 데이터 가져오기
+    const { data, error } = await supabase
+      .from('spots')
+      .select('*');
+
+    if (error) {
+      console.error("데이터 로딩 실패:", error);
+    } else if (data) {
+      setSpots(data);
+      
+      // 통계 계산
+      const avg = data.length > 0 ? Math.round(data.reduce((acc, cur) => acc + cur.음주업소합계, 0) / data.length) : 0;
+      const cctv = data.length > 0 ? Math.round((data.filter(s => s.카메라수 > 0).length / data.length) * 100) : 0;
+      
+      setStats({ avg_shops: avg, cctv_rate: cctv });
+    }
+    setLoading(false);
+  }
 
   return (
     <div className="flex h-screen bg-slate-950 text-slate-50 font-sans">
@@ -40,7 +53,7 @@ function App() {
 
         <div className="p-4 border-t border-slate-800">
           <button className="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 rounded-xl transition-colors">
-            <Settings size={18} /> 설정
+            <LogIn size={18} /> 로그인
           </button>
         </div>
       </aside>
@@ -49,11 +62,11 @@ function App() {
       <main className="flex-1 flex flex-col">
         {/* 상단 헤더 */}
         <header className="h-16 border-b border-slate-800 flex items-center justify-between px-8 bg-slate-900/50 backdrop-blur-md">
-          <h2 className="text-xl font-semibold">울산 남구 지능형 관제 시스템</h2>
+          <h2 className="text-xl font-semibold">울산 남구 지능형 관제 시스템 (Supabase)</h2>
           <div className="flex items-center gap-4">
              <span className="flex items-center gap-2 text-sm text-slate-400">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                시스템 가동 중
+                서버리스 모드 작동 중
              </span>
           </div>
         </header>
@@ -67,7 +80,7 @@ function App() {
                 url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
               />
-              {data.spots.map((spot, idx) => (
+              {spots.map((spot, idx) => (
                 <CircleMarker
                   key={idx}
                   center={[spot.위도, spot.경도]}
@@ -79,7 +92,7 @@ function App() {
                 >
                   <Popup>
                     <div className="text-slate-900 p-1">
-                      <p className="font-bold border-b mb-1">위험 지점 정보</p>
+                      <p className="font-bold border-b mb-1">{spot.사고다발지id} 지점</p>
                       <p>업소 수: {spot.음주업소합계}개</p>
                       <p>CCTV: {spot.카메라수}대</p>
                     </div>
@@ -93,22 +106,26 @@ function App() {
           <div className="flex-1 space-y-6 overflow-y-auto pr-2">
             <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-lg">
               <p className="text-slate-400 text-sm font-medium mb-1">평균 위험 업소</p>
-              <p className="text-3xl font-bold text-red-500">{data.stats.avg_shops || 0}개</p>
+              <p className="text-3xl font-bold text-red-500">{stats.avg_shops}개</p>
             </div>
             
             <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-lg border-b-4 border-b-green-500">
               <p className="text-slate-400 text-sm font-medium mb-1">CCTV 충족률</p>
-              <p className="text-3xl font-bold">{data.stats.cctv_rate || 0}%</p>
+              <p className="text-3xl font-bold">{stats.cctv_rate}%</p>
             </div>
 
             <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-lg h-64 flex flex-col">
               <p className="text-slate-400 text-sm font-medium mb-4">관제 시스템 로그</p>
               <div className="flex-1 bg-black/50 rounded-xl p-3 font-mono text-xs text-green-400 overflow-y-auto space-y-1">
-                <p>[11:15:02] 시스템 부팅 완료</p>
-                <p>[11:15:03] 백엔드 API 연결 성공</p>
-                <p>[11:15:05] 위험 데이터 로드 중...</p>
+                <p>[SYSTEM] Supabase 연동 완료</p>
+                <p>[AUTH] 익명 세션 활성화</p>
+                <p>[DATA] 'spots' 테이블 로드 성공</p>
                 <p className="text-slate-500">--------------------------</p>
-                <p>[11:15:10] 분석 완료: {data.spots.length}개 지점 활성화</p>
+                {loading ? (
+                  <p className="animate-pulse">데이터 동기화 중...</p>
+                ) : (
+                  <p>[INFO] {spots.length}개 위험 지점 맵핑됨</p>
+                )}
               </div>
             </div>
           </div>
