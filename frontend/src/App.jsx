@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { MapContainer, TileLayer, CircleMarker, Marker, Polyline, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { supabase } from './supabaseClient'
-import { ShieldAlert, Video, BarChart3, Play, Square, AlertTriangle, Car, Eye, Activity } from 'lucide-react'
+import { ShieldAlert, Video, BarChart3, Play, Square, AlertTriangle, Car, Eye, Activity, Wifi } from 'lucide-react'
 
 // 시나리오 추적 경로 (울산 남구 삼산동 → 공업탑 → 달동)
 const SCENARIO_ROUTE = [
@@ -223,8 +223,10 @@ export default function App() {
         {/* 3패널 본문 */}
         <div className="flex-1 flex min-h-0">
 
-          {/* ── 왼쪽: AI 엔진 패널 ── */}
+          {/* ── 왼쪽 패널 ── */}
           <div className="w-72 border-r border-slate-800 flex flex-col gap-3 p-3 overflow-y-auto shrink-0">
+
+            {activeNav === 'analysis' ? (<>
 
             {/* XGBoost 특성 중요도 */}
             <div className="bg-slate-900 rounded-xl border border-slate-800 p-4">
@@ -313,6 +315,78 @@ export default function App() {
                 </div>
               )}
             </div>
+
+            </>) : (<>
+
+            {/* ITS CCTV 연동 현황 */}
+            <div className="bg-slate-900 rounded-xl border border-slate-800 p-4">
+              <p className="text-xs font-semibold text-slate-400 mb-4 flex items-center gap-2">
+                <Wifi size={12} className="text-blue-400" />
+                ITS CCTV 실시간 연동
+              </p>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <span className="w-2 h-2 rounded-full bg-green-500 mt-1 shrink-0" />
+                  <div>
+                    <p className="text-xs font-semibold text-green-400">국토교통부 API 키 발급 완료</p>
+                    <p className="text-xs text-slate-500 mt-0.5">울산 남구 도로 CCTV 접근 권한 확보</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="w-2 h-2 rounded-full bg-orange-400 mt-1 shrink-0 animate-pulse" />
+                  <div>
+                    <p className="text-xs font-semibold text-orange-400">연동 개발 진행 중</p>
+                    <p className="text-xs text-slate-500 mt-0.5">실시간 스트리밍 파이프라인 구축 중</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="w-2 h-2 rounded-full bg-slate-600 mt-1 shrink-0" />
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500">실시간 스트리밍 전환 예정</p>
+                    <p className="text-xs text-slate-600 mt-0.5">시뮬레이션 → 실제 영상 전환</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 현재 운영 모드 */}
+            <div className="bg-slate-900 rounded-xl border border-slate-800 p-4">
+              <p className="text-xs font-semibold text-slate-400 mb-3">현재 운영 모드</p>
+              <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 mb-3">
+                <p className="text-xs font-bold text-orange-400 mb-1">시뮬레이션 모드</p>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  ITS CCTV 연동 완료 시 실시간 영상 기반 추적으로 전환됩니다.
+                </p>
+              </div>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                ▶ 위험 분석 탭 → 시나리오 시작으로 현재 기능 시연 가능
+              </p>
+            </div>
+
+            {/* 네트워크 정보 */}
+            <div className="bg-slate-900 rounded-xl border border-slate-800 p-4">
+              <p className="text-xs font-semibold text-slate-400 mb-3">ITS CCTV 네트워크</p>
+              <div className="space-y-2 text-xs font-mono">
+                <div className="flex justify-between py-1 border-b border-slate-800">
+                  <span className="text-slate-500">제공기관</span>
+                  <span className="text-slate-300">국토교통부</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-800">
+                  <span className="text-slate-500">대상 구역</span>
+                  <span className="text-slate-300">울산 남구</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-800">
+                  <span className="text-slate-500">커버리지</span>
+                  <span className="text-slate-300">주요 간선도로</span>
+                </div>
+                <div className="flex justify-between py-1">
+                  <span className="text-slate-500">API 상태</span>
+                  <span className="text-green-400 font-bold">● 발급 완료</span>
+                </div>
+              </div>
+            </div>
+
+            </>)}
           </div>
 
           {/* ── 중앙: 지도 ── */}
