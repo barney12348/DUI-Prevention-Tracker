@@ -312,8 +312,8 @@ export default function App() {
             {/* absolute inset-0: flexbox 안에서 height:100%가 안 먹히는 문제 해결 */}
             <div className="absolute inset-0">
             <MapContainer
-              center={[35.5437, 129.3301]}
-              zoom={14}
+              center={[35.5384, 129.3114]}
+              zoom={13}
               scrollWheelZoom={true}
               style={{ width: '100%', height: '100%' }}
             >

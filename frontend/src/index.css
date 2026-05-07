@@ -29,3 +29,14 @@ body {
 .leaflet-overlay-pane {
   z-index: auto;
 }
+
+/* body의 color:white 상속으로 팝업 텍스트가 안 보이는 문제 수정 */
+.leaflet-popup-content-wrapper,
+.leaflet-popup-content {
+  color: #1e293b !important;
+  background: #ffffff !important;
+}
+
+.leaflet-popup-tip {
+  background: #ffffff !important;
+}
