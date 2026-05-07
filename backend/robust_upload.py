@@ -7,7 +7,7 @@ URL = "https://otrjhxoqetuftpfdbsfv.supabase.co/rest/v1/spots"
 KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90cmpoeG9xZXR1ZnRwZmRic2Z2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwOTgxMjEsImV4cCI6MjA5MzY3NDEyMX0.xAEc9wRY0YeeZhSgCuFahUmG4CCZhhlJCZUsgPJ1qQE"
 
 def upload():
-    csv_path = "융합캡스톤디자인I/web_app/backend/data.csv"
+    csv_path = "data.csv"
     print(f"Reading {csv_path}...")
     
     try:

@@ -23,7 +23,7 @@ const SCENARIO_LOGS = [
   { delay: 10000, type: 'info',    msg: '[22:10] CCTV #7 통과 — 공업탑 방면 이동 중' },
   { delay: 12500, type: 'warn',    msg: '[22:12] ⚠ CCTV 공백 구간 진입 — 수동 추적 요청' },
   { delay: 15000, type: 'info',    msg: '[22:14] CCTV #14 통과 — 달동 방면 이동 확인' },
-  { delay: 17500, type: 'success', msg: '[22:16] ✓ 경찰청 위치 정보 전송 완료 — 검거 요청' },
+  { delay: 17500, type: 'success', msg: '[22:16] ✓ 관제 시스템 알림 전송 완료 — 위치 공유' },
 ]
 
 const FEATURE_IMPORTANCE = [
@@ -455,8 +455,7 @@ export default function App() {
                 <p className="text-amber-400 text-xs font-bold mb-1.5">📋 분석 결과 요약</p>
                 <p className="text-amber-300/80 text-xs leading-relaxed">
                   공업탑~달동 구간 CCTV 공백으로 인해 추적 지연 발생.<br />
-                  해당 구간 <b>3개소 추가 설치</b> 시 검거율{' '}
-                  <b className="text-amber-300">41% 향상</b> 예측.
+                  해당 구간 <b>3개소 추가 설치</b> 권고.
                 </p>
               </div>
             )}
