@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { MapContainer, TileLayer, CircleMarker, Marker, Polyline, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 import { supabase } from './supabaseClient'
 import { ShieldAlert, Video, BarChart3, Play, Square, AlertTriangle, Car, Eye, Activity, Wifi } from 'lucide-react'
 
