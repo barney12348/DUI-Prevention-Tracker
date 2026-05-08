@@ -17,10 +17,10 @@ const SCENARIO_ROUTE = [
 ]
 
 const SCENARIO_LOGS = [
-  { delay: 0,     type: 'warn',    msg: '[22:04] 삼산동 주차장 — 비정상 보행 패턴 감지 (위험도 88%)' },
+  { delay: 0,     type: 'warn',    msg: '[22:04] 삼산동 주차장 — 비정상 보행 패턴 감지' },
   { delay: 2500,  type: 'info',    msg: '[22:05] Pose Estimation 분석 중... 비틀거림 확인' },
   { delay: 5000,  type: 'alert',   msg: '[22:07] 타겟 차량 탑승 및 출차 확인 (번호: 12가 3456)' },
-  { delay: 7500,  type: 'info',    msg: '[22:08] YOLOv8 차량 특징 등록 완료 — 추적 시작' },
+  { delay: 7500,  type: 'info',    msg: '[22:08] 차량 번호판 인식 완료 — 추적 시작' },
   { delay: 10000, type: 'info',    msg: '[22:10] CCTV #7 통과 — 공업탑 방면 이동 중' },
   { delay: 12500, type: 'warn',    msg: '[22:12] ⚠ CCTV 공백 구간 진입 — 수동 추적 요청' },
   { delay: 15000, type: 'info',    msg: '[22:14] CCTV #14 통과 — 달동 방면 이동 확인' },
@@ -86,9 +86,9 @@ export default function App() {
   const [trackedPath, setTrackedPath] = useState([])
   const [mapCenter, setMapCenter] = useState(null)
   const [logs, setLogs] = useState([
-    { type: 'success', msg: '[SYSTEM] Supabase 연동 완료' },
-    { type: 'info',    msg: '[AUTH] 익명 세션 활성화' },
-    { type: 'info',    msg: '[DATA] spots 테이블 로드 성공' },
+    { type: 'success', msg: '[SYSTEM] 관제 시스템 활성화' },
+    { type: 'info',    msg: '[DATA] 울산 남구 27개 지점 로드 완료' },
+    { type: 'info',    msg: '[MAP] 위험도 분석 완료 — 대기 중' },
   ])
 
   const intervalRef = useRef(null)
@@ -267,7 +267,6 @@ export default function App() {
                     <div className="text-center z-10 space-y-1">
                       <div className="w-2 h-2 bg-red-500 rounded-full animate-ping mx-auto" />
                       <p className="text-red-400 text-xs font-mono font-bold">비틀거림 감지</p>
-                      <p className="text-yellow-400 text-xs font-mono">위험도 88%</p>
                     </div>
                     <div className="absolute top-2 left-2 flex items-center gap-1">
                       <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
@@ -497,6 +496,24 @@ export default function App() {
                   className="flex items-center gap-2 px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold text-sm rounded-full shadow-lg transition-colors"
                 >
                   <Square size={14} /> 중지
+                </button>
+              )}
+              {scenarioDone && (
+                <button
+                  onClick={() => {
+                    setScenarioDone(false)
+                    setTrackerPos(null)
+                    setTrackedPath([])
+                    setMapCenter(null)
+                    setLogs([
+                      { type: 'success', msg: '[SYSTEM] 관제 시스템 활성화' },
+                      { type: 'info',    msg: '[DATA] 울산 남구 27개 지점 로드 완료' },
+                      { type: 'info',    msg: '[MAP] 위험도 분석 완료 — 대기 중' },
+                    ])
+                  }}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold text-sm rounded-full shadow-lg transition-colors"
+                >
+                  다시 시작
                 </button>
               )}
             </div>
